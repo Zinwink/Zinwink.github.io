@@ -11,6 +11,16 @@
     <content type="html"><![CDATA[<h1 id="有向无环图及其应用"><a href="#有向无环图及其应用" class="headerlink" title="有向无环图及其应用"></a>有向无环图及其应用</h1><ul><li>在编译原理中描述含有公共子式的数据结构</li><li>应用于拓扑排序(Topological Sort)。构建AOV-网(Activity On Vertex Network，顶点表示活动，弧表示活动间的优先关系的有向图)。</li><li>关键路径: 应用于AOE-网(Activity On Edge, 与AOV-网不同的是，AOE中边表示活动，边的权值表示活动的持续时间)。</li></ul><h2 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h2><ul><li><strong>前置知识:偏序</strong>：若集合$X$上的关系$R$满足自反性，传递性以及反对称性，则$R$是$X$上的偏序关系。<ul><li><strong>自反性</strong>: $\forall a \in X,aRa$</li><li><strong>传递性</strong>:$\forall a,b,c \in X,aRb,bRc,\to aRc$</li><li><strong>反对称性</strong>:$\forall a,b \in X,aRb,bRa\to a&#x3D;b$</li></ul></li><li><strong>前置知识:全序</strong>: $R$为$X$上的偏序，若$R$满足连接性,则$R$为$X$上的全序。<ul><li><strong>连接性</strong>: $\forall a,b \in X,要么aRb,要么bRa$</li></ul></li><li><strong>定义</strong>: 由集合的偏序得到该集合的一个全序。</li><li><strong>过程</strong>:<ol><li>在有向图中选择一个没有前驱的节点输出。</li><li>从图中删除该顶点和所有以它为尾的弧。</li><li>重复1，2直到所有顶点全部已经输出或当前图中不存在无前驱的顶点。后一种情况说明图中存在环。</li><li>在删除弧后更新节点的入度时可以使用一个栈或者队列记录入度为0的节点。当栈或者队列为空时算法结束。</li></ol></li></ul><h2 id="关键路径"><a href="#关键路径" class="headerlink" title="关键路径"></a>关键路径</h2><ul><li><strong>定义</strong>: 从开始点到结束点最长路径的长度</li><li><strong>符号表示</strong><ul><li>$a_{i}$表示活动，由有向弧$\langle j,k \rangle$表示.</li><li>从$v_{1}$至$v_{i}$的最长路径长度，叫做事件$v_{i}$的最早发生时间。这个时间决定以$v_{i}$为尾的弧的最早开始时间。</li><li>$e_{i}$表示活动$a_{i}$的最早开始时间。$l_{i}$表示$a_{i}$的最迟开始时间。若$l_{i}-e_{i}&#x3D;0$,则$a_{i}$为关键活动。</li><li>求解$e_{i},l_{i}$需要求解最早发生时间$ve_{i}$,最晚发生时间$vl_{i}$.<br>  $$<br>  \begin{equation}<br>  e_{i}&#x3D;ve{j}<br>  \end{equation}<br>  $$<br>  $$<br>  \begin{equation}<br>  l_{i}&#x3D;vl[k]-dut(\left&lt;j,k\right&gt;)<br>  \end{equation}<br>  $$</li><li>向前递推求解$ve$:$ve_{j}&#x3D;\max(ve_{i}+dut(\left&lt;i,j\right&gt;)), \forall \left&lt;i,j\right&gt;\in T$  $T$为所有以$j$节点为弧头的弧集合。</li><li>从$vl_{n-1}&#x3D;ve_{n-1}$开始向后的递推$vl_{i}&#x3D;\min(vl_{j}-dut(\left&lt;i,j\right&gt;)) \quad \forall \langle i,j\rangle \in T$ $T$为所有以$i$节点为弧尾的弧集合。</li><li>$\vdots$</li></ul></li></ul>]]></content>
     
     
+    <categories>
+      
+      <category>技术</category>
+      
+      <category>前端开发</category>
+      
+      <category>Vue.js</category>
+      
+    </categories>
+    
     
   </entry>
   
