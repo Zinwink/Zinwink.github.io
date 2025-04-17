@@ -1,0 +1,694 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/avatar.png">
+  <link rel="icon" href="/img/avatar.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Zinwink">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Python命名空间查找python查找对象的次序：locals()数组–&gt;globals()字典–&gt;__build_in__查找通过from math import sin写法可以减少查找提高性能。 12345678from math import sin1. math.sin(x) ：将查找math, sin2. sin(x) ： 直接从全局名称空间中查找sin3. sin&#x3D;mat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python高性能trick">
+<meta property="og:url" content="http://example.com/2025/04/17/Python/python%E9%AB%98%E6%80%A7%E8%83%BDtrick/index.html">
+<meta property="og:site_name" content="Zinwink&#39;s Blog">
+<meta property="og:description" content="Python命名空间查找python查找对象的次序：locals()数组–&gt;globals()字典–&gt;__build_in__查找通过from math import sin写法可以减少查找提高性能。 12345678from math import sin1. math.sin(x) ：将查找math, sin2. sin(x) ： 直接从全局名称空间中查找sin3. sin&#x3D;mat">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-17T07:31:15.054Z">
+<meta property="article:modified_time" content="2025-04-17T08:28:35.640Z">
+<meta property="article:author" content="Zinwink">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="优化">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>python高性能trick - Zinwink&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zinwink&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="python高性能trick"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-04-17 15:31" pubdate>
+          2025年4月17日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">python高性能trick</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Python命名空间查找"><a href="#Python命名空间查找" class="headerlink" title="Python命名空间查找"></a>Python命名空间查找</h1><p>python查找对象的次序：locals()数组–&gt;globals()字典–&gt;__build_in__查找<br>通过from math import sin写法可以减少查找提高性能。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> math <span class="hljs-keyword">import</span> sin<br><br><span class="hljs-number">1.</span> math.sin(x) ：将查找math, sin<br><span class="hljs-number">2.</span> sin(x) ： 直接从全局名称空间中查找sin<br><span class="hljs-number">3.</span> sin=math.sin<br>   <span class="hljs-keyword">while</span> true:<br>	 sin(x)<br>	使用局部变量指向math.sin, 从<span class="hljs-built_in">locals</span>()中查找，速度相对较快<br></code></pre></td></tr></table></figure>
+
+<h1 id="Python生成器替代列表减少内存占用"><a href="#Python生成器替代列表减少内存占用" class="headerlink" title="Python生成器替代列表减少内存占用"></a>Python生成器替代列表减少内存占用</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">fibonacci_gen</span>(<span class="hljs-params">num_items</span>):<br>	a,b=<span class="hljs-number">0</span>,<span class="hljs-number">1</span><br>	<span class="hljs-keyword">while</span> num_items:<br>		<span class="hljs-keyword">yield</span> a <span class="hljs-comment"># 生成器</span><br>		a,b=b,a+b<br>		num_items-=<span class="hljs-number">1</span><br><br>num=<span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span> <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> fibonacci_gen(<span class="hljs-number">100000</span>) <span class="hljs-keyword">if</span> n%<span class="hljs-number">3</span>==<span class="hljs-number">0</span>)<br></code></pre></td></tr></table></figure>
+
+<h1 id="使用numpy进行加速"><a href="#使用numpy进行加速" class="headerlink" title="使用numpy进行加速"></a>使用numpy进行加速</h1><p>使用Numpy可提高运行速度。减少数据内存的拷贝，可进一步提高速度。（如必要时使用+&#x3D;在内存上直接操作，减少内存的申请，减少缓存缺失，加快速度）</p>
+<h1 id="使用numexpr"><a href="#使用numexpr" class="headerlink" title="使用numexpr"></a>使用numexpr</h1><p>numpy计算的缺点是，执行向量操作A * B+C时，首先将执行操作A * B,并将结果存放在一个临时向量中，在将这个临时向量与C相加。</p>
+<p>numexpr模块可以将向量表达式编译为效率极高的代码，减少高速缓存缺失和占用的临时空间。另外numexpr还可充分利用多个CPU核心，支持OpenMP</p>
+<p>对于大数据类型有效(numexpr会引入额外机制开销。数据较小时，高速缓存可容纳所有数据，引入的额外机制只会加大开销，减小速度)。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">evaluate()函数的使用<br>ne.evaluate(<span class="hljs-string">&quot;out*D*dt+grid&quot;</span>, out=out)  指定将结果存在已经预先分配好的数组中<br></code></pre></td></tr></table></figure>
+
+<p>使用numexpr可以减少numpy运算过程中生成的临时对象，从而减少内存开销。</p>
+<h1 id="Pandas库"><a href="#Pandas库" class="headerlink" title="Pandas库"></a>Pandas库</h1><p>使用apply函数，使用raw&#x3D;true等。需要进一步了解接口用法。 配合编译和并行优化，可以进一步加速。</p>
+<h1 id="编译为C代码"><a href="#编译为C代码" class="headerlink" title="编译为C代码"></a>编译为C代码</h1><p>Cython, Numba, PyPy等工具。对于使用的Numpy等库，没有必要编译为C代码，其本身速度已经足够快，主要编译Python代码实现的CPU计算密集的场景。</p>
+<p>创建pyx文件，并对Python函数的类型进行标注，如浮点型double, 浮点复数double complex等，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_z</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> maxiter, zs, cs</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;Calculate output list using Julia update rule&quot;&quot;&quot;</span><br>    cdef unsigned <span class="hljs-built_in">int</span> i, n<br>    cdef double <span class="hljs-built_in">complex</span> z, c<br>    output = [<span class="hljs-number">0</span>] * <span class="hljs-built_in">len</span>(zs)<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(zs)):<br>        n = <span class="hljs-number">0</span><br>        z = zs[i]<br>        c = cs[i]<br>        <span class="hljs-keyword">while</span> n &lt; maxiter <span class="hljs-keyword">and</span> (z.real * z.real + z.imag * z.imag) &lt; <span class="hljs-number">4</span>:<br>            z = z * z + c<br>            n += <span class="hljs-number">1</span><br>        output[i] = n<br>    <span class="hljs-keyword">return</span> output<br></code></pre></td></tr></table></figure>
+<p>之后创建setup.py文件</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> setuptools <span class="hljs-keyword">import</span> setup<br><span class="hljs-keyword">from</span> Cython.Build <span class="hljs-keyword">import</span> cythonize<br>setup(ext_modules=cythonize(<span class="hljs-string">&quot;cythonfn.pyx&quot;</span>, compiler_directives=&#123;<span class="hljs-string">&quot;language_level&quot;</span>: <span class="hljs-string">&quot;3&quot;</span>&#125;))<br></code></pre></td></tr></table></figure>
+<p>运行setup.py进行编译</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">python setup.py build_ext --inplace<br></code></pre></td></tr></table></figure>
+<p>在python文件中调用该c语言编译好的函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> cythonfn<br>cythonfn.calculate_z() <span class="hljs-comment">#调用</span><br></code></pre></td></tr></table></figure>
+
+<p>可以使用pyximport自动编译 调用</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> pyximport<br>pyimport.install(language_level=<span class="hljs-number">3</span>)<br><br><span class="hljs-keyword">import</span> cythonfn <span class="hljs-comment">#编译好的模块</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>查看pyx文件的Python虚拟机调用</strong><br>使用 cython -a cythonfn.pyx 命令查看效果， 黄色越深代表Python虚拟机调用的越多。</p>
+<p><strong>开启OpenMP</strong><br>使用prange</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#cython: boundscheck=False</span><br><span class="hljs-keyword">from</span> cython.parallel <span class="hljs-keyword">import</span> parallel, prange<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br>cimport numpy <span class="hljs-keyword">as</span> np<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_z</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> maxiter, double <span class="hljs-built_in">complex</span>[:] zs, double <span class="hljs-built_in">complex</span>[:] cs</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;Calculate output list using Julia update rule&quot;&quot;&quot;</span><br>    cdef unsigned <span class="hljs-built_in">int</span> i, length<br>    cdef double <span class="hljs-built_in">complex</span> z, c<br>    cdef <span class="hljs-built_in">int</span>[:] output = np.empty(<span class="hljs-built_in">len</span>(zs), dtype=np.int32)<br>    length = <span class="hljs-built_in">len</span>(zs)<br>    <span class="hljs-keyword">with</span> nogil, parallel():<br>        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> prange(length, schedule=<span class="hljs-string">&quot;guided&quot;</span>):  <span class="hljs-comment"># 使用prange并行化</span><br>            z = zs[i]<br>            c = cs[i]<br>            output[i] = <span class="hljs-number">0</span><br>            <span class="hljs-keyword">while</span> output[i] &lt; maxiter <span class="hljs-keyword">and</span> (z.real * z.real + z.imag * z.imag) &lt; <span class="hljs-number">4</span>:<br>                z = z * z + c<br>                output[i] += <span class="hljs-number">1</span><br>    <span class="hljs-keyword">return</span> output<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># setup.py</span><br><span class="hljs-keyword">from</span> setuptools <span class="hljs-keyword">import</span> setup<br><br><span class="hljs-keyword">from</span> setuptools.extension <span class="hljs-keyword">import</span> Extension<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br>ext_modules = [Extension(<br>      <span class="hljs-string">&quot;cythonfn&quot;</span>,<br>      [<span class="hljs-string">&quot;cythonfn.pyx&quot;</span>],<br>      extra_compile_args=[<span class="hljs-string">&#x27;-fopenmp&#x27;</span>],<br>      extra_link_args=[<span class="hljs-string">&#x27;-fopenmp&#x27;</span>],<br>      )]<br><br><span class="hljs-keyword">from</span> Cython.Build <span class="hljs-keyword">import</span> cythonize<br>setup(ext_modules=cythonize(ext_modules, compiler_directives=&#123;<span class="hljs-string">&quot;language_level&quot;</span>: <span class="hljs-string">&quot;3&quot;</span>&#125;,),include_dirs=[np.get_include()]) <span class="hljs-comment"># 包含numpy的头文件</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="语言交互接口-调用C库"><a href="#语言交互接口-调用C库" class="headerlink" title="语言交互接口(调用C库)"></a>语言交互接口(调用C库)</h1><p>使用 ctypes或者cffi ，python模块。(cffi使用较为简单)</p>
+<h2 id="cffi-内嵌c代码"><a href="#cffi-内嵌c代码" class="headerlink" title="cffi 内嵌c代码"></a>cffi 内嵌c代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> time<br><span class="hljs-keyword">from</span> cffi <span class="hljs-keyword">import</span> FFI, verifier<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br>grid_shape = (<span class="hljs-number">512</span>, <span class="hljs-number">512</span>)<br>ffi = FFI()<br>ffi.cdef(<span class="hljs-string">&quot;void evolve(double **in, double **out, double D, double dt);&quot;</span>) <span class="hljs-comment">#包含函数声明，结构体声明等 声明对应下面的verify中的内容(可以包含函数库头文件中的某个函数声明)</span><br>lib = ffi.verify(<br>    <span class="hljs-string">r&quot;&quot;&quot;</span><br><span class="hljs-string">    void evolve(double in[][512], double out[][512], double D, double dt) &#123;</span><br><span class="hljs-string">        int i, j;</span><br><span class="hljs-string">        double laplacian;</span><br><span class="hljs-string">        for (i=1; i&lt;511; i++) &#123;</span><br><span class="hljs-string">            for (j=1; j&lt;511; j++) &#123;</span><br><span class="hljs-string">                laplacian = in[i+1][j] + in[i-1][j] + in[i][j+1] + in[i][j-1] - 4 * in[i][j];</span><br><span class="hljs-string">                out[i][j] = in[i][j] + D * dt * laplacian;</span><br><span class="hljs-string">            &#125;</span><br><span class="hljs-string">        &#125;   #verify中可以包含头文件</span><br><span class="hljs-string">    &#125;</span><br><span class="hljs-string">    &quot;&quot;&quot;</span>,<br>    extra_compile_args=[<span class="hljs-string">&quot;-O3&quot;</span>],  <span class="hljs-comment"># &lt;1&gt; 编译参数</span><br>)<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">evolve</span>(<span class="hljs-params">grid, dt, out, D=<span class="hljs-number">1.0</span></span>):<br>	<span class="hljs-comment"># 调用时需要类型转换为c语言函数参数的类型</span><br>    pointer_grid = ffi.cast(<span class="hljs-string">&quot;double**&quot;</span>, grid.ctypes.data)<br>    pointer_out = ffi.cast(<span class="hljs-string">&quot;double**&quot;</span>, out.ctypes.data)<br>    lib.evolve(pointer_grid, pointer_out, D, dt)<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">run_experiment</span>(<span class="hljs-params">num_iterations</span>):<br>    scratch = np.zeros(grid_shape, dtype=np.double)<br>    grid = np.zeros(grid_shape, dtype=np.double)<br>    block_low = <span class="hljs-built_in">int</span>(grid_shape[<span class="hljs-number">0</span>] * <span class="hljs-number">0.4</span>)<br>    block_high = <span class="hljs-built_in">int</span>(grid_shape[<span class="hljs-number">0</span>] * <span class="hljs-number">0.5</span>)<br>    grid[block_low:block_high, block_low:block_high] = <span class="hljs-number">0.005</span><br>    start = time.time()<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_iterations):<br>        evolve(grid, <span class="hljs-number">0.1</span>, scratch)<br>        grid, scratch = scratch, grid<br>    <span class="hljs-keyword">return</span> time.time() - start<br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    t = run_experiment(<span class="hljs-number">500</span>)<br>    <span class="hljs-built_in">print</span>(t)<br>    verifier.cleanup_tmpdir()<br></code></pre></td></tr></table></figure>
+
+<h2 id="调用-so库"><a href="#调用-so库" class="headerlink" title="调用.so库"></a>调用.so库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 通过gcc编译获得相关的.so文件</span><br>gcc -shared -o diffusion.so diffusion.c -O3 <br></code></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python2.7</span><br><span class="hljs-keyword">import</span> time<br><span class="hljs-keyword">from</span> cffi <span class="hljs-keyword">import</span> FFI, verifier<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br>grid_shape = (<span class="hljs-number">512</span>, <span class="hljs-number">512</span>)<br>ffi = FFI()<br>ffi.cdef(<span class="hljs-string">&quot;void evolve(double **in, double **out, double D, double dt);&quot;</span>)  <span class="hljs-comment"># &lt;1&gt;</span><br>lib = ffi.dlopen(<span class="hljs-string">&quot;07_compiling\cffi\diffusion.so&quot;</span>) <span class="hljs-comment">#注意相对路径，最好使用vscode复制，是相对工作目录的路径(当py文件和.so文件在同一目录下时，使用./diffusion.so作为路径,发现无法找到该库)</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">evolve</span>(<span class="hljs-params">grid, dt, out, D=<span class="hljs-number">1.0</span></span>):<br>    pointer_grid = ffi.cast(<span class="hljs-string">&quot;double**&quot;</span>, grid.ctypes.data)  <span class="hljs-comment"># &lt;2&gt;</span><br>    pointer_out = ffi.cast(<span class="hljs-string">&quot;double**&quot;</span>, out.ctypes.data)<br>    lib.evolve(pointer_grid, pointer_out, D, dt)<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">run_experiment</span>(<span class="hljs-params">num_iterations</span>):<br>    scratch = np.zeros(grid_shape, dtype=np.double)<br>    grid = np.zeros(grid_shape, dtype=np.double)<br>    block_low = <span class="hljs-built_in">int</span>(grid_shape[<span class="hljs-number">0</span>] * <span class="hljs-number">0.4</span>)<br>    block_high = <span class="hljs-built_in">int</span>(grid_shape[<span class="hljs-number">0</span>] * <span class="hljs-number">0.5</span>)<br>    grid[block_low:block_high, block_low:block_high] = <span class="hljs-number">0.005</span><br>    start = time.time()<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_iterations):<br>        evolve(grid, <span class="hljs-number">0.1</span>, scratch)<br>        grid, scratch = scratch, grid<br>    <span class="hljs-keyword">return</span> time.time() - start<br>    <br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    t = run_experiment(<span class="hljs-number">500</span>)<br>    <span class="hljs-built_in">print</span>(t)<br>    verifier.cleanup_tmpdir()<br></code></pre></td></tr></table></figure>
+
+<h1 id="使用array-标准库-减少占用-且适合多线程数据传送"><a href="#使用array-标准库-减少占用-且适合多线程数据传送" class="headerlink" title="使用array(标准库)减少占用,且适合多线程数据传送"></a>使用array(标准库)减少占用,且适合多线程数据传送</h1><p>array模块可以高效存储基本数据类型，如整数、浮点数和字符，但不能高效地存储复数和类。它分配了一个连续地内存块存储底层数据。（列表会占用过多内存）</p>
+<h1 id="在内存中高效存储大量文本"><a href="#在内存中高效存储大量文本" class="headerlink" title="在内存中高效存储大量文本"></a>在内存中高效存储大量文本</h1><h2 id="字典树压缩等"><a href="#字典树压缩等" class="headerlink" title="字典树压缩等"></a>字典树压缩等</h2><p>可使用字典树压缩，DAWG，Marisa字典树等(通过共享相同内容部分压缩)。<br>在字符串集合中，很多字符串的某些部分是相同的，使用字典树和DAWG可以减少内存占用。</p>
+<p>DAWG在构建后不能修改，其通过一个的迭代器构建。</p>
+<h2 id="scikit-learn-中FeatureHasher"><a href="#scikit-learn-中FeatureHasher" class="headerlink" title="scikit-learn 中FeatureHasher"></a>scikit-learn 中FeatureHasher</h2><p>DictVectorizer接受一个包含词汇和频次的字典，并将其转换为一个变宽的稀疏矩阵。<br>FeatureHasher将包含词汇和频次的字典转换为宽度固定的稀疏矩阵。</p>
+<h1 id="使用SciPy的稀疏矩阵表示减少内存"><a href="#使用SciPy的稀疏矩阵表示减少内存" class="headerlink" title="使用SciPy的稀疏矩阵表示减少内存"></a>使用SciPy的稀疏矩阵表示减少内存</h1><p>当稀疏度很大时(非0元素很少)，占用的内存少且使用专门的算法，运算效率也高。</p>
+<h1 id="使用异步I-O"><a href="#使用异步I-O" class="headerlink" title="使用异步I&#x2F;O"></a>使用异步I&#x2F;O</h1><p>I&#x2F;O是程序执行的巨大负担。每当从文件读取数据或者将数据写入网络套接字时，代码都必须暂停，以等待内核与外部联系，I&#x2F;O完毕后才能执行后继操作。并发式异步编程，通过在I&#x2F;O等待的时间段内执行其他操作，从而缩短程序的执行时间。</p>
+<h1 id="multiprocessing-Joblib模块"><a href="#multiprocessing-Joblib模块" class="headerlink" title="multiprocessing,Joblib模块"></a>multiprocessing,Joblib模块</h1><p>使用并行的方式进行加速。Joblib专为科学计算设计</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/python/" class="print-no-link">#python</a>
+      
+        <a href="/tags/%E4%BC%98%E5%8C%96/" class="print-no-link">#优化</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>python高性能trick</div>
+      <div>http://example.com/2025/04/17/Python/python高性能trick/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Zinwink</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年4月17日</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>更新于</div>
+          <div>2025年4月17日</div>
+        </div>
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/04/17/Git/Git%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" title="Git的基本使用">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Git的基本使用</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
