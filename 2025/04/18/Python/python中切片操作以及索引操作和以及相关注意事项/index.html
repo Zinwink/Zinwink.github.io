@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/avatar.png">
+  <link rel="icon" href="/img/avatar.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Zinwink">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Python 中 切片操作注意事项list 切片操作 内存独立性： 原列表和通过切片得到的新列表在内存中是分开的。 修改其中一个不会影响另一个  12345a &#x3D; [1, 2, 3, 4] b &#x3D; a[:2] # b 是 [1, 2] b.append(5) # 修改 b 不会影响 a print(a) # 输出: [1, 2, 3, 4] print(b) # 输出: [1, 2, 5]  浅拷">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python中切片操作以及索引操作和以及相关注意事项">
+<meta property="og:url" content="http://example.com/2025/04/18/Python/python%E4%B8%AD%E5%88%87%E7%89%87%E6%93%8D%E4%BD%9C%E4%BB%A5%E5%8F%8A%E7%B4%A2%E5%BC%95%E6%93%8D%E4%BD%9C%E5%92%8C%E4%BB%A5%E5%8F%8A%E7%9B%B8%E5%85%B3%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/index.html">
+<meta property="og:site_name" content="Zinwink&#39;s Blog">
+<meta property="og:description" content="Python 中 切片操作注意事项list 切片操作 内存独立性： 原列表和通过切片得到的新列表在内存中是分开的。 修改其中一个不会影响另一个  12345a &#x3D; [1, 2, 3, 4] b &#x3D; a[:2] # b 是 [1, 2] b.append(5) # 修改 b 不会影响 a print(a) # 输出: [1, 2, 3, 4] print(b) # 输出: [1, 2, 5]  浅拷">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-18T05:01:33.080Z">
+<meta property="article:modified_time" content="2025-04-18T05:19:28.740Z">
+<meta property="article:author" content="Zinwink">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="pytorch">
+<meta property="article:tag" content="numpy">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>python中切片操作以及索引操作和以及相关注意事项 - Zinwink&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zinwink&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="python中切片操作以及索引操作和以及相关注意事项"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-04-18 13:01" pubdate>
+          2025年4月18日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">python中切片操作以及索引操作和以及相关注意事项</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Python-中-切片操作注意事项"><a href="#Python-中-切片操作注意事项" class="headerlink" title="Python 中 切片操作注意事项"></a>Python 中 切片操作注意事项</h1><h2 id="list-切片操作"><a href="#list-切片操作" class="headerlink" title="list 切片操作"></a>list 切片操作</h2><ol>
+<li>内存独立性： 原列表和通过切片得到的新列表在内存中是分开的。 修改其中一个不会影响另一个</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">a = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>] <br>b = a[:<span class="hljs-number">2</span>] <span class="hljs-meta"># b 是 [1, 2] </span><br>b.<span class="hljs-built_in">append</span>(<span class="hljs-number">5</span>) # 修改 b 不会影响 a <br><span class="hljs-built_in">print</span>(a) # 输出: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>] <br><span class="hljs-built_in">print</span>(b) # 输出: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">5</span>]<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>浅拷贝： 列表中包含的引用类型，都是进行浅拷贝，内部对象不会进行深拷贝</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">a = [[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>], [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>]]<br>b = a[:<span class="hljs-number">1</span>] <span class="hljs-meta"># b 包含 a 的第一个子列表的引用</span><br>b[<span class="hljs-number">0</span>].<span class="hljs-built_in">append</span>(<span class="hljs-number">5</span>) # 这将影响到 a 中对应子列表的内容<br><span class="hljs-built_in">print</span>(a) # 输出: [[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">5</span>], [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>]]<br></code></pre></td></tr></table></figure>
+<ol start="3">
+<li>会影响的情形 赋值：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python">-----------------------------修改<br>view_shape = [<span class="hljs-number">64</span>, <span class="hljs-number">128</span>,<span class="hljs-number">128</span>]<br><span class="hljs-comment"># view_shape[1:] = [1] * (len(view_shape) - 1)</span><br>view_shape[<span class="hljs-number">1</span>:] = [<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>]<br><span class="hljs-built_in">print</span>(view_shape) <span class="hljs-comment"># [64, 1, 1, 1]</span><br>---------------------------不修改<br>view_shape = [<span class="hljs-number">64</span>, <span class="hljs-number">128</span>,<span class="hljs-number">128</span>]<br><span class="hljs-comment"># view_shape[1:] = [1] * (len(view_shape) - 1)</span><br>view_shape[<span class="hljs-number">1</span>:][<span class="hljs-number">0</span>] = [<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>]<br><span class="hljs-built_in">print</span>(view_shape)  <span class="hljs-comment"># [64, 128, 128]</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="numpy-数组切片操作"><a href="#numpy-数组切片操作" class="headerlink" title="numpy 数组切片操作"></a>numpy 数组切片操作</h2><ol>
+<li>Numpy 尽量避免复制数据以提高效率。因此许多切片返回的是原始数据的一个视图，这意味着对视图所做的修改会影响到原始数组</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-keyword">import</span> numpy as np<br>arr = np.<span class="hljs-built_in">array</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>])<br>view = arr[<span class="hljs-number">1</span>:<span class="hljs-number">4</span>] # 这是一个视图<br>view[<span class="hljs-number">0</span>] = <span class="hljs-number">999</span> # 修改视图会影响原数组<br><span class="hljs-built_in">print</span>(arr) # 输出: [ <span class="hljs-number">1</span> <span class="hljs-number">999</span> <span class="hljs-number">3</span> <span class="hljs-number">4</span> <span class="hljs-number">5</span>]<br></code></pre></td></tr></table></figure>
+
+<p>pytorch Tensor的切片操作和 numpy切片操作相似，都是返回一个视图</p>
+<h1 id="Python-引用类型传参注意事项"><a href="#Python-引用类型传参注意事项" class="headerlink" title="Python 引用类型传参注意事项"></a>Python 引用类型传参注意事项</h1><p>Python 引用类型作为函数参数时，传递的是对象的引用地址。 和C&#x2F;C++中指针的传参类似， C++中传递的是指针的副本(指向相同内存对象， 但是是不同指针，是原指针的副本， 修改指向不会影响原指针)。 </p>
+<ol>
+<li>非引用类型</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">modify_immutable</span>(<span class="hljs-params">x</span>): <br>	x = x + <span class="hljs-number">1</span> <span class="hljs-comment"># 尝试修改 x </span><br><br>a = <span class="hljs-number">5</span> <br>modify_immutable(a) <br><span class="hljs-built_in">print</span>(a) <span class="hljs-comment"># 输出: 5，原始变量 a 没有变化</span><br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>引用类型(不对引用的内存对象操作， 只对引用操作时， 只是引用副本的指向变化， 原引用不受影响)</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">reassign_mutable</span>(<span class="hljs-params">lst</span>): <br>	<span class="hljs-comment"># lst 是引用副本， 下面是修改引用的指向</span><br>	lst = [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>] <span class="hljs-comment"># 这里是重新赋值，不是修改原列表 </span><br><br>my_list = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]<br>reassign_mutable(my_list) <br><span class="hljs-built_in">print</span>(my_list) <span class="hljs-comment"># 输出: [1, 2, 3]，原始列表 my_list 没有变化</span><br></code></pre></td></tr></table></figure>
+
+
+<h1 id="None-扩展维度，广播机制计算距离矩阵"><a href="#None-扩展维度，广播机制计算距离矩阵" class="headerlink" title="None 扩展维度，广播机制计算距离矩阵"></a>None 扩展维度，广播机制计算距离矩阵</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">square_distance</span>(<span class="hljs-params">src, dst</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Calculate Euclid distance between each two points.</span><br><span class="hljs-string">    src^T * dst = xn * xm + yn * ym + zn * zm；</span><br><span class="hljs-string">    sum(src^2, dim=-1) = xn*xn + yn*yn + zn*zn;</span><br><span class="hljs-string">    sum(dst^2, dim=-1) = xm*xm + ym*ym + zm*zm;</span><br><span class="hljs-string">    dist = (xn - xm)^2 + (yn - ym)^2 + (zn - zm)^2</span><br><span class="hljs-string">         = sum(src**2,dim=-1)+sum(dst**2,dim=-1)-2*src^T*dst</span><br><span class="hljs-string">    Input:</span><br><span class="hljs-string">        src: source points, [B, N, C]</span><br><span class="hljs-string">        dst: target points, [B, M, C]</span><br><span class="hljs-string">    Output:</span><br><span class="hljs-string">        dist: per-point square distance, [B, N, M]</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-keyword">return</span> torch.<span class="hljs-built_in">sum</span>((src[:, :, <span class="hljs-literal">None</span>] - dst[:, <span class="hljs-literal">None</span>]) ** <span class="hljs-number">2</span>, dim=-<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+
+<h1 id="Numpy-Pytorch-索引操作"><a href="#Numpy-Pytorch-索引操作" class="headerlink" title="Numpy Pytorch 索引操作"></a>Numpy Pytorch 索引操作</h1><ol>
+<li>… 选择所有剩余维度</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><br><span class="hljs-comment"># 创建一个形状为 [2, 3, 4] 的张量</span><br>tensor = torch.randn(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>)<br><span class="hljs-comment"># 使用 ... 选择所有剩余维度</span><br>expanded_tensor = tensor[..., <span class="hljs-literal">None</span>]<br><span class="hljs-built_in">print</span>(expanded_tensor.shape)  <span class="hljs-comment"># 输出: torch.Size([2, 3, 4, 1])</span><br><span class="hljs-comment"># `tensor[..., None]` 等价于 `tensor[:, :, :, None]`</span><br>---------------------------------------------------------<br><br></code></pre></td></tr></table></figure>
+
+<h2 id="Pytorch-张量索引"><a href="#Pytorch-张量索引" class="headerlink" title="Pytorch 张量索引"></a>Pytorch 张量索引</h2><ol>
+<li>使用 torch.gather 获取（适用于复杂索引， 多维索引）</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">index_points</span>(<span class="hljs-params">points, idx</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Input:</span><br><span class="hljs-string">        points: input points data, [B, N, C]</span><br><span class="hljs-string">        idx: sample index data, [B, S, [K]]</span><br><span class="hljs-string">    Return:</span><br><span class="hljs-string">        new_points:, indexed points data, [B, S, [K], C]</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    raw_size = idx.size()<br>    idx = idx.reshape(raw_size[<span class="hljs-number">0</span>], -<span class="hljs-number">1</span>)<br>    res = torch.gather(points, <span class="hljs-number">1</span>, idx[..., <span class="hljs-literal">None</span>].expand(-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, points.size(-<span class="hljs-number">1</span>)))<br>    <span class="hljs-keyword">return</span> res.reshape(*raw_size, -<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>使用高级索引</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">index_points</span>(<span class="hljs-params">points, idx</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Input:</span><br><span class="hljs-string">        points: input points data, [B, N, C]</span><br><span class="hljs-string">        idx: sample index data, [B, S, K]</span><br><span class="hljs-string">    Return:</span><br><span class="hljs-string">        new_points: indexed points data, [B, S, K, C]</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-comment"># 使用高级索引从 points 中提取数据</span><br>    B, S, K = idx.shape<br>    <span class="hljs-comment"># 创建一个范围张量，用于批次索引</span><br>    batch_indices = torch.arange(B).view(B, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)<br>    <span class="hljs-comment"># 使用高级索引提取数据</span><br>    new_points = points[batch_indices, idx]<br>    <span class="hljs-keyword">return</span> new_points<br><br><span class="hljs-comment"># 示例</span><br>points = torch.randn(<span class="hljs-number">2</span>, <span class="hljs-number">5</span>, <span class="hljs-number">3</span>)  <span class="hljs-comment"># 形状为 [B, N, C]</span><br>idx = torch.tensor([[[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]], [[<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]])  <span class="hljs-comment"># 形状为 [B, S, K]</span><br><br>new_points = index_points(points, idx)<br><span class="hljs-built_in">print</span>(new_points.shape)  <span class="hljs-comment"># 输出: torch.Size([2, 2, 3, 3])</span><br><br></code></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>使用1维索引(加上适当的偏移量)</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">index_points</span>(<span class="hljs-params">points, idx</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Input:</span><br><span class="hljs-string">        points: input points data, [B, N, C]</span><br><span class="hljs-string">        idx: sample index data, [B, S, K]</span><br><span class="hljs-string">    Return:</span><br><span class="hljs-string">        new_points: indexed points data, [B, S, K, C]</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    B, N, C = points.shape<br>    S, K = idx.shape[<span class="hljs-number">1</span>], idx.shape[<span class="hljs-number">2</span>]<br><br>    <span class="hljs-comment"># 计算偏移量</span><br>    offset = torch.arange(B).view(B, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>) * N<br><br>    <span class="hljs-comment"># 计算一维索引</span><br>    flat_idx = idx + offset<br><br>    <span class="hljs-comment"># 使用一维索引提取数据</span><br>    flat_points = points.view(B * N, C)<br>    flat_new_points = flat_points[flat_idx.view(-<span class="hljs-number">1</span>)]<br><br>    <span class="hljs-comment"># 重塑结果</span><br>    new_points = flat_new_points.view(B, S, K, C)<br><br>    <span class="hljs-keyword">return</span> new_points<br><br><span class="hljs-comment"># 示例</span><br>points = torch.randn(<span class="hljs-number">2</span>, <span class="hljs-number">5</span>, <span class="hljs-number">3</span>)  <span class="hljs-comment"># 形状为 [B, N, C]</span><br>idx = torch.tensor([[[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]], [[<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]])  <span class="hljs-comment"># 形状为 [B, S, K]</span><br><br>new_points = index_points(points, idx)<br><span class="hljs-built_in">print</span>(new_points.shape)  <span class="hljs-comment"># 输出: torch.Size([2, 2, 3, 3])</span><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>torch.index_select()函数 索引张量是一维的</li>
+</ol>
+<h2 id="Pytorch-切片赋值"><a href="#Pytorch-切片赋值" class="headerlink" title="Pytorch 切片赋值"></a>Pytorch 切片赋值</h2><p>切片赋值是在原内存中写入数据， 而不是开辟内存后重新指向新内存空间。（因此和就地操作性能相同）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><br><span class="hljs-comment"># 创建一个张量</span><br>a = torch.tensor([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>])<br><br><span class="hljs-comment"># 切片, 获得的只是视图</span><br>b = a[<span class="hljs-number">1</span>:<span class="hljs-number">4</span>]<br><br><span class="hljs-comment"># 检查数据指针</span><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Before assignment:&quot;</span>)<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;a.data_ptr():&quot;</span>, a.data_ptr())<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;b.data_ptr():&quot;</span>, b.data_ptr())<br><br><span class="hljs-comment"># 对 b 进行范围切片赋值</span><br>b[:] = torch.tensor([<span class="hljs-number">99</span>, <span class="hljs-number">88</span>, <span class="hljs-number">77</span>])  <span class="hljs-comment"># 使用范围切片赋值</span><br><br><span class="hljs-comment"># 打印结果</span><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;After assignment:&quot;</span>)<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;a:&quot;</span>, a)<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;b:&quot;</span>, b)<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;a.data_ptr():&quot;</span>, a.data_ptr())<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;b.data_ptr():&quot;</span>, b.data_ptr())<br></code></pre></td></tr></table></figure>
+<p>输出结果为</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">Before assignment:<br>a.data_ptr(): 510923136<br>b.data_ptr(): 510923144<br>After assignment:<br>a: tensor([ 1, 99, 88, 77,  5]) <span class="hljs-comment"># 原tensor改变内容</span><br>b: tensor([99, 88, 77])<br>a.data_ptr(): 510923136 <span class="hljs-comment"># 内存指向不变</span><br>b.data_ptr(): 510923144 <span class="hljs-comment"># 内存指向不变</span><br></code></pre></td></tr></table></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/python/" class="print-no-link">#python</a>
+      
+        <a href="/tags/pytorch/" class="print-no-link">#pytorch</a>
+      
+        <a href="/tags/numpy/" class="print-no-link">#numpy</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>python中切片操作以及索引操作和以及相关注意事项</div>
+      <div>http://example.com/2025/04/18/Python/python中切片操作以及索引操作和以及相关注意事项/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Zinwink</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年4月18日</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>更新于</div>
+          <div>2025年4月18日</div>
+        </div>
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/04/17/Git/Git%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" title="Git的基本使用">
+                        <span class="hidden-mobile">Git的基本使用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
