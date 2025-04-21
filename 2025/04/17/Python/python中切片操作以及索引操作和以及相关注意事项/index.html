@@ -22,12 +22,12 @@
     <meta name="description" content="Python 中 切片操作注意事项list 切片操作 内存独立性： 原列表和通过切片得到的新列表在内存中是分开的。 修改其中一个不会影响另一个  12345a &#x3D; [1, 2, 3, 4] b &#x3D; a[:2] # b 是 [1, 2] b.append(5) # 修改 b 不会影响 a print(a) # 输出: [1, 2, 3, 4] print(b) # 输出: [1, 2, 5]  浅拷">
 <meta property="og:type" content="article">
 <meta property="og:title" content="python中切片操作以及索引操作和以及相关注意事项">
-<meta property="og:url" content="http://example.com/2025/04/18/Python/python%E4%B8%AD%E5%88%87%E7%89%87%E6%93%8D%E4%BD%9C%E4%BB%A5%E5%8F%8A%E7%B4%A2%E5%BC%95%E6%93%8D%E4%BD%9C%E5%92%8C%E4%BB%A5%E5%8F%8A%E7%9B%B8%E5%85%B3%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/index.html">
+<meta property="og:url" content="http://example.com/2025/04/17/Python/python%E4%B8%AD%E5%88%87%E7%89%87%E6%93%8D%E4%BD%9C%E4%BB%A5%E5%8F%8A%E7%B4%A2%E5%BC%95%E6%93%8D%E4%BD%9C%E5%92%8C%E4%BB%A5%E5%8F%8A%E7%9B%B8%E5%85%B3%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/index.html">
 <meta property="og:site_name" content="Zinwink&#39;s Blog">
 <meta property="og:description" content="Python 中 切片操作注意事项list 切片操作 内存独立性： 原列表和通过切片得到的新列表在内存中是分开的。 修改其中一个不会影响另一个  12345a &#x3D; [1, 2, 3, 4] b &#x3D; a[:2] # b 是 [1, 2] b.append(5) # 修改 b 不会影响 a print(a) # 输出: [1, 2, 3, 4] print(b) # 输出: [1, 2, 5]  浅拷">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-04-18T05:01:33.080Z">
-<meta property="article:modified_time" content="2025-04-18T05:19:28.740Z">
+<meta property="article:published_time" content="2025-04-17T02:00:00.000Z">
+<meta property="article:modified_time" content="2025-04-17T02:00:00.000Z">
 <meta property="article:author" content="Zinwink">
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="pytorch">
@@ -213,8 +213,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2025-04-18 13:01" pubdate>
-          2025年4月18日 下午
+        <time datetime="2025-04-17 10:00" pubdate>
+          2025年4月17日 上午
         </time>
       </span>
     
@@ -311,7 +311,7 @@
 <h1 id="None-扩展维度，广播机制计算距离矩阵"><a href="#None-扩展维度，广播机制计算距离矩阵" class="headerlink" title="None 扩展维度，广播机制计算距离矩阵"></a>None 扩展维度，广播机制计算距离矩阵</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">square_distance</span>(<span class="hljs-params">src, dst</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Calculate Euclid distance between each two points.</span><br><span class="hljs-string">    src^T * dst = xn * xm + yn * ym + zn * zm；</span><br><span class="hljs-string">    sum(src^2, dim=-1) = xn*xn + yn*yn + zn*zn;</span><br><span class="hljs-string">    sum(dst^2, dim=-1) = xm*xm + ym*ym + zm*zm;</span><br><span class="hljs-string">    dist = (xn - xm)^2 + (yn - ym)^2 + (zn - zm)^2</span><br><span class="hljs-string">         = sum(src**2,dim=-1)+sum(dst**2,dim=-1)-2*src^T*dst</span><br><span class="hljs-string">    Input:</span><br><span class="hljs-string">        src: source points, [B, N, C]</span><br><span class="hljs-string">        dst: target points, [B, M, C]</span><br><span class="hljs-string">    Output:</span><br><span class="hljs-string">        dist: per-point square distance, [B, N, M]</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-keyword">return</span> torch.<span class="hljs-built_in">sum</span>((src[:, :, <span class="hljs-literal">None</span>] - dst[:, <span class="hljs-literal">None</span>]) ** <span class="hljs-number">2</span>, dim=-<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
 
 <h1 id="Numpy-Pytorch-索引操作"><a href="#Numpy-Pytorch-索引操作" class="headerlink" title="Numpy Pytorch 索引操作"></a>Numpy Pytorch 索引操作</h1><ol>
-<li>… 选择所有剩余维度</li>
+<li>选择所有剩余维度</li>
 </ol>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><br><span class="hljs-comment"># 创建一个形状为 [2, 3, 4] 的张量</span><br>tensor = torch.randn(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>)<br><span class="hljs-comment"># 使用 ... 选择所有剩余维度</span><br>expanded_tensor = tensor[..., <span class="hljs-literal">None</span>]<br><span class="hljs-built_in">print</span>(expanded_tensor.shape)  <span class="hljs-comment"># 输出: torch.Size([2, 3, 4, 1])</span><br><span class="hljs-comment"># `tensor[..., None]` 等价于 `tensor[:, :, :, None]`</span><br>---------------------------------------------------------<br><br></code></pre></td></tr></table></figure>
 
@@ -387,7 +387,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>python中切片操作以及索引操作和以及相关注意事项</div>
-      <div>http://example.com/2025/04/18/Python/python中切片操作以及索引操作和以及相关注意事项/</div>
+      <div>http://example.com/2025/04/17/Python/python中切片操作以及索引操作和以及相关注意事项/</div>
     </div>
     <div class="license-meta">
       
@@ -399,14 +399,9 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2025年4月18日</div>
+          <div>2025年4月17日</div>
         </div>
       
-      
-        <div class="license-meta-item license-meta-date">
-          <div>更新于</div>
-          <div>2025年4月18日</div>
-        </div>
       
       
         <div class="license-meta-item">
@@ -436,9 +431,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2025/04/18/Algorithm/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E4%BB%A5%E5%8F%8A%E4%B8%8A%E4%B8%8B%E7%95%8C%E9%97%AE%E9%A2%98/" title="二分查找以及lower_bound,upper_bound的实现">
+                      <a href="/2025/04/17/Git/Git%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" title="Git的基本使用">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">二分查找以及lower_bound,upper_bound的实现</span>
+                        <span class="hidden-mobile">Git的基本使用</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -446,8 +441,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2025/04/17/Git/Git%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" title="Git的基本使用">
-                        <span class="hidden-mobile">Git的基本使用</span>
+                      <a href="/2025/04/17/Python/python%E9%AB%98%E6%80%A7%E8%83%BDtrick/" title="python高性能trick">
+                        <span class="hidden-mobile">python高性能trick</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
